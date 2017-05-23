@@ -1,5 +1,6 @@
 from random import randint
 from BaseAI_3 import BaseAI
+import math
 
 # Numbers that may spawn
 possible_nums = [2,4]
@@ -20,16 +21,19 @@ class PlayerAI(BaseAI):
 			gridCopy = grid.clone()
 			gridCopy.move(move)
 
-			value = self.maxValue(gridCopy, 1, -1e9, 1e9)
+			value = self.minValue(gridCopy, 1, -1e9, 1e9)
 			if (value > max_value):
 				max_value = value
 				best_move = move
+		#print(max_value)
 		return best_move
 
 	def maxValue(self, grid, depth, alpha, beta):
 		moves = grid.getAvailableMoves()
 		if len(moves) == 0:
-			return 0;
+			return 0
+		if depth == 2:
+			return self.utility(grid)
 		max_value = -1e9
 
 		# Try each available move
@@ -43,8 +47,6 @@ class PlayerAI(BaseAI):
 		return max_value
 
 	def minValue(self, grid, depth, alpha, beta):
-		if depth == 4:
-			return self.utility(grid)
 		cells = grid.getAvailableCells()
 		min_value = 1e9
 
@@ -60,45 +62,35 @@ class PlayerAI(BaseAI):
 
 	def utility(self, grid):
 		ret = 0
-		max_cell = 0
-		max_corner = -1
-		max_corner_pos = (-1,-1)
-		max_side = 0
+		cells = []
 		total = 16
 
-		# Get average cell number
 		sum = 0
 		for i in range(4):
 			for j in range(4):
 				cell_value = grid.getCellValue((i, j))
-				max_cell = max(max_cell, cell_value)
 
-				# Treat empty cells preciously
 				if cell_value == 0:
 					total -= 1
-				elif (i, j) in [(0,0),(0,3),(3,3),(3,3)]:
-					max_corner = max(max_corner, cell_value)
-					max_corner_pos = (i,j)
-				elif i in [0,3] or j in [0,3]:
-					max_side = max(max_side, cell_value)
+				else:
+					cells.append(cell_value)
 
 				sum += cell_value
 
-		di = [0,-1,1,0]
-		dj = [1,0,0,-1]
-		if max_corner == max_cell:
-			ret += 10000
-			for i in range(4):
-				x = max_corner_pos[0] + di[i]
-				y = max_corner_pos[1] + dj[i]
-				if not grid.crossBound((x, y)):
-					ret += grid.map[x][y] * 10
-		for i in range(4):
-			for j in range(4):
-				ret += grid.map[i][j] * (6 - abs(i - max_corner_pos[0] + j - max_corner_pos[1]))
+
+		# Average
 		ret += sum / total
 
-		# Each 2 contiguous similar cells add their summed value to the utility
+		# Median
+		cells.sort()
+		if total % 2 == 0:
+			ret += (cells[int(total / 2)] + cells[int(total / 2) - 1]) / 2
+		else:
+			ret += cells[math.floor(total / 2)]
+
+		# Each 2 contiguous similar cells add their value to the utility
+		di = [0,-1,1,0]
+		dj = [1,0,0,-1]
 		vis = [[False for i in range(4)] for j in range(4)]
 		for i in range(4):
 			for j in range(4):
@@ -109,13 +101,23 @@ class PlayerAI(BaseAI):
 						if (not grid.crossBound((x, y)) and not vis[x][y] and
 						grid.map[i][j] == grid.map[x][y]):
 							vis[i][j] = vis[x][y] = True
-							ret += grid.map[i][j] * 2
-
-				# The cell with maximum value must stick to a side
-				#if grid.map[i][j] == max_cell :
-				#	if (i, j) in [(0,0),(0,3),(3,3),(3,3)]:
-				#		ret += 1e5
-				#	elif i in [0,3] or j in [0,3]:
-				#		ret += 50000
+							ret += grid.map[i][j] * 1.5
 		
+		# Most important one
+		monotonicity = max(
+			self.mono(grid, (0,0), (1,1)),
+			self.mono(grid, (0,3), (1,-1)),
+			self.mono(grid, (3,3), (-1,-1)),
+			self.mono(grid, (3,0), (-1,1)))
+		ret += monotonicity
+
 		return ret
+
+	def mono(self, grid, pos, dir):
+		if grid.map[pos[0]][pos[1]] == 0: return 0;
+		ret = grid.map[pos[0]][pos[1]] ** 2
+		if not grid.crossBound((pos[0] + dir[0], pos[1])) and grid.map[pos[0] + dir[0]][pos[1]] <= grid.map[pos[0]][pos[1]]:
+			ret += self.mono(grid, (pos[0] + dir[0], pos[1]), dir)
+		if not grid.crossBound((pos[0], pos[1] + dir[1])) and grid.map[pos[0]][pos[1] + dir[1]] <= grid.map[pos[0]][pos[1]]:
+			ret += self.mono(grid, (pos[0], pos[1] + dir[1]), dir)
+		return ret;
