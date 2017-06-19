@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- jquery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style media="screen">
+	@import url('https://fonts.googleapis.com/css?family=Architects+Daughter');
+	html,
+	body {
+		height: 100%;
+		margin: 0px;
+	}
+
+	.main {
+		display: flex;
+		justify-content: center;
+	}
+
+	table {
+		margin-top: 30px;
+	}
+
+	#board td {
+		width: 150px;
+		height: 150px;
+		font-size: 100px;
+		font-family: 'Architects Daughter', cursive;
+	}
+
+	#board td:hover {
+		background-color: #eee;
+		cursor: pointer;
+	}
+
+	.topDown,
+	.leftRight {
+		border-color: black;
+		border-width: thick;
+	}
+
+	.topDown {
+		border-top-style: solid;
+		border-bottom-style: solid;
+	}
+
+	.leftRight {
+		border-left-style: solid;
+		border-right-style: solid;
+	}
+
+	#stats td {
+		width: 250px;
+		font-size: 20px;
+	}
+
+	.bttn {
+		background-color: white;
+		border-style: solid;
+		border-width: 4px;
+		border-radius: 5px;
+		border-color: #161515;
+	}
+</style>
+
+<body>
+	<div id="board" class="main text-center">
+		<table>
+			<tr>
+				<td id='0' onclick="play(0,0)"></td>
+				<td id='1' onclick="play(0,1)" class="leftRight"></td>
+				<td id='2' onclick="play(0,2)"></td>
+			</tr>
+			<tr class="topDown">
+				<td id='3' onclick="play(1,0)"></td>
+				<td id='4' onclick="play(1,1)" class="leftRight"></td>
+				<td id='5' onclick="play(1,2)"></td>
+			</tr>
+			<tr>
+				<td id='6' onclick="play(2,0)"></td>
+				<td id='7' onclick="play(2,1)" class="leftRight"></td>
+				<td id='8' onclick="play(2,2)"></td>
+			</tr>
+		</table>
+	</div>
+	<div id="stats" class="main text-center">
+		<table>
+			<tr>
+				<td colspan="3" id="won">Try to win!</td>
+			</tr>
+			<tr>
+				<td colspan="3" id="quote"></td>
+			</tr>
+			<tr>
+				<td colspan="3"><button class="bttn" onclick="reset()">Again</button> <button class="bttn" id="switch" onclick="switchSym()">Playing as X</button></td>
+			</tr>
+			<tr>
+				<td>YOU</td>
+				<td>AI</td>
+			</tr>
+			<tr>
+				<td id="playerScore">0</td>
+				<td id="aiScore">0</td>
+			</tr>
+		</table>
+	</div>
+</body>
+
+</html>
